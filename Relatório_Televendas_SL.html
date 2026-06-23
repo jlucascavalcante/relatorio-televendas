@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório Televendas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #F0F7F2;
+    --card: #FFFFFF;
+    --dark: #0D2B1A;
+    --accent: #1A7A3C;
+    --accent2: #25A85A;
+    --green-light: #E4F5EB;
+    --green-mid: #C2E8CE;
+    --amber: #E0930A;
+    --amber-light: #FFF5E0;
+    --red: #C0392B;
+    --red-light: #FDECEA;
+    --text: #0D2B1A;
+    --muted: #5A7A65;
+    --border: #D0E8D8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 28px 16px 60px;
+  }
+  .page { max-width: 480px; margin: 0 auto; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0D2B1A 0%, #1A4A2A 60%, #1e6035 100%);
+    border-radius: 22px;
+    padding: 26px 24px 22px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(37,168,90,0.15);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(37,168,90,0.08);
+  }
+  .logo-empresa {
+    position: absolute;
+    top: 18px; right: 18px;
+    width: 100px;
+    background: #fff;
+    padding: 5px 9px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 2;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(37,168,90,0.25);
+    border: 1px solid rgba(37,168,90,0.4);
+    color: #7FE0A8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    position: relative; z-index: 1;
+  }
+  .header-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    position: relative; z-index: 1;
+  }
+  .header-title span { color: #7FE0A8; }
+  .header-date {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 18px;
+    position: relative; z-index: 1;
+  }
+  .header-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    position: relative; z-index: 1;
+  }
+  .hstat {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 11px 14px;
+  }
+  .hstat-label { font-size: 10px; color: rgba(255,255,255,0.45); margin-bottom: 4px; letter-spacing: 0.04em; }
+  .hstat-value { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+  .hstat-value.green { color: #7FE0A8; }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 18px 0 10px;
+  }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+  .kpi-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 15px 16px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent2);
+    border-radius: 16px 0 0 16px;
+  }
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .kpi-value { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); }
+  .kpi-value.accent { color: var(--accent); }
+  .kpi-value.green { color: var(--accent2); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .kpi-card.full { grid-column: span 2; }
+  .kpi-card.full::before { background: linear-gradient(180deg, var(--accent2), var(--accent)); }
+
+  /* VENDA DESTAQUE */
+  .venda-card {
+    background: linear-gradient(135deg, var(--dark) 0%, #1A4A2A 100%);
+    border-radius: 18px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .venda-label { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+  .venda-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #fff; }
+  .venda-sub { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+  .venda-icon { font-size: 40px; opacity: 0.3; }
+
+  /* VISITAS */
+  .visitas-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+  .vis-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 13px 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .vis-icon { font-size: 18px; margin-bottom: 5px; }
+  .vis-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.03em; }
+  .vis-value { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); }
+  .vis-value.accent { color: var(--accent); }
+  .vis-value.green { color: var(--accent2); }
+
+  /* TAXA CONVERSÃO */
+  .taxa-card {
+    background: var(--green-light);
+    border: 1px solid var(--green-mid);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .taxa-label { font-size: 12px; color: var(--accent); font-weight: 600; }
+  .taxa-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent); }
+  .taxa-bar-wrap { height: 8px; background: var(--green-mid); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .taxa-bar { height: 100%; border-radius: 4px; background: var(--accent2); transition: width 0.6s ease; }
+
+  /* CHARTS */
+  .chart-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px 16px 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .chart-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .chart-wrap { position: relative; }
+
+  /* PRODUTO DESTAQUE */
+  .prod-destaque {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 13px 16px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .prod-destaque-icon {
+    width: 40px; height: 40px;
+    background: var(--green-light);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .prod-destaque-info { flex: 1; }
+  .prod-destaque-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .prod-destaque-nome { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin: 2px 0; }
+  .prod-destaque-qtd { font-size: 12px; color: var(--accent2); font-weight: 600; }
+
+  /* PRODUTOS LIST */
+  .produtos-card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .produtos-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .produtos-card.expandido .produtos-header { border-bottom-color: var(--border); background: var(--green-light); }
+  .produtos-header-left { display: flex; align-items: center; gap: 10px; }
+  .produtos-titulo { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+  .produtos-total {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    background: var(--green-light); color: var(--accent);
+  }
+  .produtos-chevron { font-size: 12px; color: var(--muted); transition: transform 0.25s; }
+  .produtos-card.expandido .produtos-chevron { transform: rotate(180deg); }
+  .produtos-body { display: none; padding: 10px 12px 12px; max-height: 420px; overflow-y: auto; }
+  .produtos-card.expandido .produtos-body { display: block; }
+
+  .prod-search {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+  .prod-search:focus { border-color: var(--accent2); background: #fff; }
+
+  .prod-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+    transition: background 0.15s;
+  }
+  .prod-row:last-child { border-bottom: none; }
+  .prod-row:hover { background: var(--green-light); border-radius: 8px; }
+  .prod-nome { font-size: 12px; color: var(--text); font-weight: 500; flex: 1; min-width: 0; }
+  .prod-var { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .prod-input-wrap { display: flex; align-items: center; gap: 4px; }
+  .prod-btn {
+    width: 24px; height: 24px;
+    background: var(--green-light);
+    border: 1px solid var(--green-mid);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .prod-btn:hover { background: var(--green-mid); }
+  .prod-qty {
+    width: 36px;
+    text-align: center;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 4px 2px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .prod-qty:focus { border-color: var(--accent2); background: #fff; }
+  .prod-qty.has-value { color: var(--accent); border-color: var(--accent2); background: var(--green-light); }
+
+  /* OBSERVAÇÕES */
+  .obs-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .obs-label { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .obs-textarea {
+    width: 100%;
+    min-height: 80px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .obs-textarea:focus { border-color: var(--accent2); background: #fff; }
+
+  /* INPUT PANEL */
+  .btn-toggle {
+    background: transparent; border: none;
+    font-size: 11px; color: rgba(255,255,255,0.4);
+    cursor: pointer; padding: 0; white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s; position: relative; z-index: 1;
+  }
+  .btn-toggle:hover { color: rgba(255,255,255,0.7); }
+
+  .input-panel {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 18px 18px;
+    margin-top: 10px;
+    border: 1px solid var(--border);
+    display: block;
+  }
+  .input-panel.fechado { display: none; }
+  .input-panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; color: var(--muted);
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .input-group { display: flex; flex-direction: column; gap: 5px; }
+  .input-group.full { grid-column: span 2; }
+  .input-group label { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .input-group input {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    color: var(--text); background: var(--bg);
+    outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .input-group input:focus { border-color: var(--accent2); background: #fff; }
+  .btn-calcular {
+    margin-top: 12px; width: 100%;
+    background: var(--accent);
+    color: #fff; border: none;
+    border-radius: 12px; padding: 13px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.05em;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-calcular:hover { opacity: 0.88; }
+  .btn-calcular:active { transform: scale(0.98); }
+
+  /* FOOTER */
+  .footer-area {
+    margin-top: 26px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 12px;
+  }
+  .footer { font-size: 11px; color: var(--muted); }
+
+  /* BTN SALVAR */
+  .btn-salvar {
+    background: var(--accent2); color: #fff; border: none;
+    border-radius: 10px; padding: 8px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.04em;
+    transition: opacity 0.2s;
+  }
+  .btn-salvar:hover { opacity: 0.88; }
+
+
+  /* PRODUCT COLORS */
+  .prod-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 3px;
+  }
+  .prod-row { padding-left: 4px; }
+
+  /* SCROLLBAR */
+  .produtos-body::-webkit-scrollbar { width: 4px; }
+  .produtos-body::-webkit-scrollbar-track { background: var(--bg); border-radius: 2px; }
+  .produtos-body::-webkit-scrollbar-thumb { background: var(--green-mid); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:1;">
+      <div>
+        <div class="header-badge">📞 Televendas</div>
+        <div class="header-title">Relatório de<br><span>Vendas do Dia</span></div>
+        <div class="header-date" id="out_data_header">—</div>
+      </div>
+      <button class="btn-toggle" id="btn_toggle" onclick="togglePainel()">✕ fechar</button>
+    </div>
+    <div class="header-stats">
+      <div class="hstat">
+        <div class="hstat-label">Venda do dia</div>
+        <div class="hstat-value green" id="out_venda_dia">R$ 0,00</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Ticket médio</div>
+        <div class="hstat-value" id="out_ticket_medio_header">R$ —</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Visitas feitas</div>
+        <div class="hstat-value" id="out_visitas_header">0</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Taxa de conversão</div>
+        <div class="hstat-value green" id="out_taxa_header">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL DE EDIÇÃO -->
+  <div class="input-panel" id="painel">
+    <div class="input-panel-title">Dados do dia</div>
+    <div class="input-grid">
+      <div class="input-group full">
+        <label>Data</label>
+        <input type="date" id="inp_data">
+      </div>
+      <div class="input-group full">
+        <label>Venda do dia (R$)</label>
+        <input type="text" id="inp_venda" placeholder="0,00" oninput="formatarMoeda(this)">
+      </div>
+      <div class="input-group">
+        <label>Visitas feitas</label>
+        <input type="number" id="inp_visitas_feitas" placeholder="0" min="0">
+      </div>
+      <div class="input-group">
+        <label>Visitas efetivadas</label>
+        <input type="number" id="inp_visitas_efetivadas" placeholder="0" min="0">
+      </div>
+      <div class="input-group full">
+        <label>Nº de pedidos / NFs emitidas</label>
+        <input type="number" id="inp_pedidos" placeholder="0" min="0">
+      </div>
+    </div>
+    <button class="btn-calcular" onclick="calcular()">Calcular e fechar</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="section-label">Indicadores do dia</div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Pedidos / NFs</div>
+      <div class="kpi-value accent" id="out_pedidos">—</div>
+      <div class="kpi-sub">emitidas hoje</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ticket médio</div>
+      <div class="kpi-value green" id="out_ticket_medio">R$ —</div>
+      <div class="kpi-sub">por pedido</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Visitas feitas</div>
+      <div class="kpi-value" id="out_visitas_feitas">0</div>
+      <div class="kpi-sub">contatos realizados</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Visitas efetivadas</div>
+      <div class="kpi-value green" id="out_visitas_efetivadas">0</div>
+      <div class="kpi-sub">convertidas em pedido</div>
+    </div>
+  </div>
+
+  <!-- TAXA CONVERSÃO -->
+  <div class="section-label">Taxa de conversão</div>
+  <div class="taxa-card">
+    <div>
+      <div class="taxa-label">Visitas → Pedidos</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:3px;" id="out_taxa_desc">0 de 0 visitas convertidas</div>
+      <div class="taxa-bar-wrap" style="width:160px; margin-top:10px;">
+        <div class="taxa-bar" id="taxa_bar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="taxa-value" id="out_taxa">0%</div>
+  </div>
+
+  <!-- PRODUTO MAIS VENDIDO -->
+  <div class="section-label">Destaque do dia</div>
+  <div class="prod-destaque" id="prod_destaque">
+    <div class="prod-destaque-icon">⭐</div>
+    <div class="prod-destaque-info">
+      <div class="prod-destaque-label">Produto mais vendido</div>
+      <div class="prod-destaque-nome" id="out_prod_nome">Nenhum produto lançado</div>
+      <div class="prod-destaque-qtd" id="out_prod_qtd"></div>
+    </div>
+  </div>
+
+  <!-- GRÁFICO ROSCA: VISITAS -->
+  <div class="section-label">Visitas</div>
+  <div class="chart-card">
+    <div class="chart-title">Feitas vs. Efetivadas</div>
+    <div class="chart-wrap" style="height:180px; display:flex; align-items:center; justify-content:center; gap:20px;">
+      <canvas id="chart_visitas" width="160" height="160"></canvas>
+      <div id="legenda_visitas" style="font-size:12px; color:var(--muted);">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#1A7A3C;display:inline-block;"></span>Efetivadas: <b id="leg_efet">0</b></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#D0E8D8;display:inline-block;"></span>Não convertidas: <b id="leg_nao">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRÁFICO BARRAS: PRODUTOS -->
+  <div class="section-label">Produtos vendidos</div>
+  <div class="chart-card" id="chart_prod_card" style="display:none;">
+    <div class="chart-title">Top produtos por unidades</div>
+    <div class="chart-wrap">
+      <canvas id="chart_produtos" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- LISTA DE PRODUTOS -->
+  <div class="produtos-card" id="produtos_card">
+    <div class="produtos-header" onclick="toggleProdutos()">
+      <div class="produtos-header-left">
+        <div class="produtos-titulo">📦 Lançar produtos vendidos</div>
+        <span class="produtos-total" id="badge_prod_total">0 itens</span>
+      </div>
+      <span class="produtos-chevron" id="chevron_prod">▼</span>
+    </div>
+    <div class="produtos-body" id="produtos_body">
+      <input type="text" class="prod-search" id="prod_search" placeholder="🔍  Buscar produto..." oninput="filtrarProdutos()">
+      <div id="lista_produtos"></div>
+    </div>
+  </div>
+
+  <!-- OBSERVAÇÕES -->
+  <div class="section-label">Observações do dia</div>
+  <div class="obs-card">
+    <div class="obs-label">Anotações</div>
+    <textarea class="obs-textarea" id="inp_obs" placeholder="Clientes sem estoque, objeções, oportunidades, feedbacks..."></textarea>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-area">
+    <div class="footer" id="out_rodape">—</div>
+    <button class="btn-salvar" onclick="salvarHTML()">💾 Salvar</button>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ---- DADOS DOS PRODUTOS ----
+var PRODUTOS = [
+  { nome: "Angels Eyes Snack", var: "30 tabletes" },
+  { nome: "Aquálitus Blue", var: "100 mL" },
+  { nome: "Aquálitus Blue", var: "250 mL" },
+  { nome: "Caps D Cal", var: "30 cápsulas" },
+  { nome: "Captor cápsulas", var: "60 cápsulas" },
+  { nome: "Captor sachês", var: "cx 15 sachês" },
+  { nome: "Eletrorade Pet", var: "cx 10 sachês" },
+  { nome: "Eoff", var: "30 cápsulas" },
+  { nome: "Glutamax GP", var: "10 mL" },
+  { nome: "Glutamax GP", var: "40 mL" },
+  { nome: "Glutamax GP", var: "80 mL" },
+  { nome: "Glutamax GP", var: "250 mL" },
+  { nome: "Hemo Care GP", var: "15 mL" },
+  { nome: "Hemo Care GP", var: "30 mL" },
+  { nome: "Hemo Care GP", var: "100 mL" },
+  { nome: "Hemo Care GP", var: "250 mL" },
+  { nome: "Hemo Care Green", var: "30 cápsulas" },
+  { nome: "Microlac Probiótico", var: "seringa 15 g" },
+  { nome: "Microlac Probiótico", var: "seringa 34 g" },
+  { nome: "NF Reability Inovet", var: "lata 280 mg" },
+  { nome: "Omegaderm 30% EPA & DHA 500 mg", var: "30 cápsulas" },
+  { nome: "Omegaderm 30% EPA & DHA 500 mg", var: "90 cápsulas" },
+  { nome: "Omegaderm 30% EPA & DHA 1000 mg", var: "30 cápsulas" },
+  { nome: "Omegaderm 60% EPA & DHA 500 mg", var: "30 cápsulas" },
+  { nome: "Omegaderm 60% EPA & DHA 1000 mg", var: "30 cápsulas" },
+  { nome: "Omegaderm 90% EPA & DHA 500 mg", var: "30 cápsulas" },
+  { nome: "Omegaderm DHA Supremo 50%", var: "30 cápsulas" },
+  { nome: "Omegaderm DHA Supremo 90%", var: "30 cápsulas" },
+  { nome: "Otópic Ag", var: "120 mL" },
+  { nome: "Pancrezyme cápsulas", var: "60 cápsulas 280 mg" },
+  { nome: "Pancrezyme cápsulas", var: "60 cápsulas 500 mg" },
+  { nome: "Pancrezyme sachês", var: "10 sachês 2,8 g" },
+  { nome: "Pancrezyme sachês", var: "30 sachês 2,8 g" },
+  { nome: "Pet Zentrum Soft Gel", var: "30 cápsulas" },
+  { nome: "Pet Zentrum Pro AN", var: "80 cápsulas" },
+  { nome: "Salute 21,8", var: "3 sachês" },
+  { nome: "Salute 21,8", var: "10 sachês" },
+  { nome: "Salute 21,8", var: "30 sachês" },
+  { nome: "Salute 108 g", var: "3 sachês" },
+  { nome: "Targimax 10", var: "10 mL" },
+  { nome: "Targimax 10", var: "40 mL" },
+  { nome: "Targimax 10", var: "100 mL" },
+  { nome: "Targimax 10", var: "250 mL" },
+  { nome: "Plaqueoff Inovet", var: "40 g e colher" },
+  { nome: "Orozyme Inovet Gel", var: "70 g" },
+  { nome: "Orozyme Chews Inovet", var: "Box Tam. P (21 un)" },
+  { nome: "Orozyme Chews Inovet", var: "Box Tam. M (12 un)" },
+  { nome: "Orozyme Chews Inovet", var: "Box Tam. G (7 un)" },
+  { nome: "Renavast Cat Inovet", var: "60 cápsulas 300 mg" },
+  { nome: "Renavast Dog Inovet", var: "60 cápsulas 1000 mg" },
+  { nome: "Proaction AS 120 4E", var: "750 mL" },
+  { nome: "Proaction AS 130 7E", var: "1 L" },
+  { nome: "Proaction AS 130 7E", var: "5 L" },
+  { nome: "Oxi Ultra", var: "1 L" },
+  { nome: "Oxi Ultra", var: "5 L" },
+  { nome: "Cascotônico", var: "200 mL" },
+  { nome: "Cascotônico", var: "1 L" },
+  { nome: "Glutamax Equine Liquid", var: "1 L" },
+  { nome: "Glutamax Equine Liquid", var: "5 L" },
+  { nome: "Hemo Care Equine Liquid", var: "500 mL" },
+  { nome: "Hemo Care Equine Liquid", var: "3,8 L" },
+  { nome: "Targimax 10 Equine Liquid", var: "500 mL" },
+];
+
+// ---- ESTADO ----
+var state = {
+  data: '',
+  venda: 0,
+  visitas_feitas: 0,
+  visitas_efetivadas: 0,
+  pedidos: 0,
+  obs: '',
+  qtds: {}  // key: index -> qty
+};
+
+var chartVisitas = null;
+var chartProdutos = null;
+
+// ---- INIT ----
+window.onload = function() {
+  carregarDadosSalvos();
+
+  // Data de hoje, quando não houver relatório salvo
+  if (!state.data) {
+    var hoje = new Date();
+    var dia = String(hoje.getDate()).padStart(2,'0');
+    var mes = String(hoje.getMonth()+1).padStart(2,'0');
+    var ano = hoje.getFullYear();
+    state.data = ano + '-' + mes + '-' + dia;
+  }
+
+  renderListaProdutos(PRODUTOS);
+  initCharts();
+  aplicarStateNosInputs();
+  atualizarTelaCompleta(false);
+
+  document.getElementById('inp_obs').addEventListener('input', function() {
+    state.obs = this.value;
+  });
+};
+
+// Paleta de cores para os produtos (por nome de produto único)
+var PALETA = [
+  '#1A7A3C','#2980B9','#8E44AD','#E67E22','#C0392B','#16A085',
+  '#D35400','#2C3E50','#27AE60','#6C3483','#1A5276','#A04000',
+  '#117A65','#784212','#1F618D','#7D6608','#4A235A','#0E6655',
+  '#922B21','#1B4F72','#145A32','#6E2F1A','#4D5656','#1A2E40'
+];
+var CORES_PRODUTO = {};
+(function() {
+  var nomes = [];
+  PRODUTOS.forEach(function(p) { if (nomes.indexOf(p.nome) === -1) nomes.push(p.nome); });
+  nomes.forEach(function(n, i) { CORES_PRODUTO[n] = PALETA[i % PALETA.length]; });
+})();
+
+function renderListaProdutos(lista) {
+  var html = '';
+  lista.forEach(function(p) {
+    var idx = PRODUTOS.indexOf(p);
+    var qty = state.qtds[idx] || 0;
+    var cor = CORES_PRODUTO[p.nome] || '#1A7A3C';
+    html += '<div class="prod-row" id="row_' + idx + '" style="border-left: 3px solid ' + cor + '; padding-left: 8px; border-radius: 0 8px 8px 0; margin-bottom:2px;">';
+    html += '<div style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:0;">';
+    html += '<span class="prod-dot" style="background:' + cor + ';margin-top:4px;"></span>';
+    html += '<div><div class="prod-nome" style="color:' + cor + ';font-weight:600;">' + p.nome + '</div><div class="prod-var">' + p.var + '</div></div>';
+    html += '</div>';
+    html += '<div class="prod-input-wrap">';
+    html += '<button class="prod-btn" style="background:' + cor + '22;border-color:' + cor + '44;color:' + cor + ';" onclick="changeQty(' + idx + ',-1)">−</button>';
+    html += '<input type="number" class="prod-qty' + (qty > 0 ? ' has-value' : '') + '" id="qty_' + idx + '" value="' + (qty || '') + '" placeholder="0" min="0" oninput="onQtyInput(' + idx + ', this)" style="' + (qty > 0 ? 'border-color:' + cor + ';color:' + cor + ';' : '') + '">';
+    html += '<button class="prod-btn" style="background:' + cor + '22;border-color:' + cor + '44;color:' + cor + ';" onclick="changeQty(' + idx + ',1)">+</button>';
+    html += '</div></div>';
+  });
+  document.getElementById('lista_produtos').innerHTML = html;
+}
+
+function filtrarProdutos() {
+  var termo = document.getElementById('prod_search').value.toLowerCase();
+  var filtrados = PRODUTOS.filter(function(p) {
+    return p.nome.toLowerCase().includes(termo) || p.var.toLowerCase().includes(termo);
+  });
+  renderListaProdutos(filtrados);
+}
+
+function changeQty(idx, delta) {
+  var curr = state.qtds[idx] || 0;
+  var novo = Math.max(0, curr + delta);
+  state.qtds[idx] = novo;
+  var el = document.getElementById('qty_' + idx);
+  if (el) {
+    el.value = novo || '';
+    var cor = CORES_PRODUTO[PRODUTOS[idx].nome] || '#1A7A3C';
+    el.className = 'prod-qty' + (novo > 0 ? ' has-value' : '');
+    el.style.borderColor = novo > 0 ? cor : '';
+    el.style.color = novo > 0 ? cor : '';
+  }
+  atualizarProdutos();
+}
+
+function onQtyInput(idx, el) {
+  var val = parseInt(el.value) || 0;
+  if (val < 0) val = 0;
+  state.qtds[idx] = val;
+  var cor = CORES_PRODUTO[PRODUTOS[idx].nome] || '#1A7A3C';
+  el.className = 'prod-qty' + (val > 0 ? ' has-value' : '');
+  el.style.borderColor = val > 0 ? cor : '';
+  el.style.color = val > 0 ? cor : '';
+  atualizarProdutos();
+}
+
+function atualizarProdutos() {
+  // Total de itens com venda
+  var total = 0;
+  Object.keys(state.qtds).forEach(function(k) { if (state.qtds[k] > 0) total++; });
+  document.getElementById('badge_prod_total').textContent = total + ' itens';
+
+  // Produto mais vendido
+  var melhorIdx = -1, melhorQtd = 0;
+  Object.keys(state.qtds).forEach(function(k) {
+    if (state.qtds[k] > melhorQtd) { melhorQtd = state.qtds[k]; melhorIdx = parseInt(k); }
+  });
+  if (melhorIdx >= 0) {
+    var p = PRODUTOS[melhorIdx];
+    document.getElementById('out_prod_nome').textContent = p.nome + ' · ' + p.var;
+    document.getElementById('out_prod_qtd').textContent = melhorQtd + ' unidades vendidas';
+  } else {
+    document.getElementById('out_prod_nome').textContent = 'Nenhum produto lançado';
+    document.getElementById('out_prod_qtd').textContent = '';
+  }
+
+  atualizarGraficoProdutos();
+}
+
+function atualizarGraficoProdutos() {
+  // Top 6 produtos
+  var itens = [];
+  Object.keys(state.qtds).forEach(function(k) {
+    if (state.qtds[k] > 0) {
+      var p = PRODUTOS[parseInt(k)];
+      itens.push({ label: p.nome + ' · ' + p.var, qty: state.qtds[k], cor: CORES_PRODUTO[p.nome] || '#1A7A3C' });
+    }
+  });
+  itens.sort(function(a,b) { return b.qty - a.qty; });
+  var top = itens.slice(0, 6);
+
+  var card = document.getElementById('chart_prod_card');
+  if (top.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  var labels = top.map(function(i) { return i.label; });
+  var data = top.map(function(i) { return i.qty; });
+  var cores = top.map(function(i) { return i.cor; });
+
+  if (window.Chart) {
+    if (chartProdutos) {
+      chartProdutos.data.labels = labels;
+      chartProdutos.data.datasets[0].data = data;
+      chartProdutos.data.datasets[0].backgroundColor = cores;
+      chartProdutos.update();
+    } else {
+      var ctx = document.getElementById('chart_produtos').getContext('2d');
+      chartProdutos = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: cores,
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          indexAxis: 'y',
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: '#E4F5EB' }, ticks: { color: '#5A7A65', font: { family: 'DM Sans', size: 11 } } },
+            y: { grid: { display: false }, ticks: { color: '#0D2B1A', font: { family: 'DM Sans', size: 11 } } }
+          }
+        }
+      });
+    }
+  } else {
+    desenharBarrasCanvas(top);
+  }
+}
+
+function desenharBarrasCanvas(top) {
+  var canvas = document.getElementById('chart_produtos');
+  if (!canvas) return;
+  canvas.width = 440;
+  canvas.height = Math.max(200, top.length * 42 + 30);
+  canvas.style.width = '100%';
+  canvas.style.height = canvas.height + 'px';
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  var max = Math.max.apply(null, top.map(function(i){ return i.qty; })) || 1;
+  ctx.font = '12px DM Sans, Arial';
+  top.forEach(function(item, i) {
+    var y = 24 + i * 42;
+    var label = item.label.length > 36 ? item.label.slice(0, 34) + '…' : item.label;
+    ctx.fillStyle = '#0D2B1A';
+    ctx.fillText(label, 8, y);
+    var barW = Math.max(8, (item.qty / max) * 250);
+    ctx.fillStyle = item.cor;
+    roundRect(ctx, 8, y + 8, barW, 16, 6);
+    ctx.fill();
+    ctx.fillStyle = '#5A7A65';
+    ctx.fillText(String(item.qty), 18 + barW, y + 21);
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function initCharts() {
+  if (window.Chart) {
+    var ctx = document.getElementById('chart_visitas').getContext('2d');
+    chartVisitas = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Efetivadas', 'Não convertidas'],
+        datasets: [{
+          data: [0, 1],
+          backgroundColor: ['#1A7A3C', '#D0E8D8'],
+          borderWidth: 0,
+          hoverOffset: 4,
+        }]
+      },
+      options: {
+        responsive: false,
+        cutout: '72%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: {
+          label: function(c) { return ' ' + c.label + ': ' + c.raw; }
+        }}}
+      }
+    });
+  } else {
+    chartVisitas = null;
+    desenharRoscaCanvas(0, 0);
+  }
+}
+
+function desenharRoscaCanvas(feitas, efetivadas) {
+  var canvas = document.getElementById('chart_visitas');
+  if (!canvas) return;
+  canvas.width = 160;
+  canvas.height = 160;
+  var ctx = canvas.getContext('2d');
+  var cx = 80, cy = 80, r = 68;
+  var ef = Math.max(0, efetivadas);
+  var nao = Math.max(0, feitas - efetivadas);
+  var total = feitas > 0 ? feitas : 1;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.lineWidth = 28;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.strokeStyle = '#D0E8D8';
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+  if (ef > 0) {
+    var ini = -Math.PI / 2;
+    var fim = ini + (Math.PI * 2 * (ef / total));
+    ctx.beginPath();
+    ctx.strokeStyle = '#1A7A3C';
+    ctx.arc(cx, cy, r, ini, fim);
+    ctx.stroke();
+  }
+}
+
+function atualizarGraficoVisitas(feitas, efetivadas) {
+  var naoConv = Math.max(0, feitas - efetivadas);
+  var ef = Math.max(0, efetivadas);
+  if (window.Chart && chartVisitas) {
+    if (feitas === 0) { chartVisitas.data.datasets[0].data = [0, 1]; }
+    else { chartVisitas.data.datasets[0].data = [ef, naoConv]; }
+    chartVisitas.update();
+  } else {
+    desenharRoscaCanvas(feitas, efetivadas);
+  }
+  document.getElementById('leg_efet').textContent = ef;
+  document.getElementById('leg_nao').textContent = naoConv;
+}
+
+// ---- FORMATAR MOEDA ----
+function formatarMoeda(el) {
+  var v = el.value.replace(/\D/g,'');
+  if (!v) { el.value = ''; return; }
+  v = (parseInt(v) / 100).toFixed(2);
+  el.value = v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function parseMoeda(str) {
+  if (!str) return 0;
+  return parseFloat(str.replace(/\./g,'').replace(',','.')) || 0;
+}
+
+function fmtBRL(n) {
+  return 'R$ ' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+
+function carregarDadosSalvos() {
+  var el = document.getElementById('relatorio-dados-salvos');
+  if (!el) return;
+  try {
+    var dados = JSON.parse(el.textContent || '{}');
+    state.data = dados.data || '';
+    state.venda = Number(dados.venda || 0);
+    state.visitas_feitas = Number(dados.visitas_feitas || 0);
+    state.visitas_efetivadas = Number(dados.visitas_efetivadas || 0);
+    state.pedidos = Number(dados.pedidos || 0);
+    state.obs = dados.obs || '';
+    state.qtds = dados.qtds || {};
+  } catch(e) {
+    console.warn('Não foi possível carregar dados salvos.', e);
+  }
+}
+
+function aplicarStateNosInputs() {
+  document.getElementById('inp_data').value = state.data || '';
+  document.getElementById('inp_venda').value = state.venda ? fmtBRL(state.venda).replace('R$ ', '') : '';
+  document.getElementById('inp_visitas_feitas').value = state.visitas_feitas || '';
+  document.getElementById('inp_visitas_efetivadas').value = state.visitas_efetivadas || '';
+  document.getElementById('inp_pedidos').value = state.pedidos || '';
+  document.getElementById('inp_obs').value = state.obs || '';
+}
+
+function atualizarTelaCompleta(fecharPainel) {
+  // Data
+  if (state.data) {
+    var p = state.data.split('-');
+    if (p.length === 3) document.getElementById('out_data_header').textContent = p[2]+'/'+p[1]+'/'+p[0];
+  }
+
+  document.getElementById('out_venda_dia').textContent = fmtBRL(state.venda || 0);
+  document.getElementById('out_visitas_feitas').textContent = state.visitas_feitas || 0;
+  document.getElementById('out_visitas_efetivadas').textContent = state.visitas_efetivadas || 0;
+  document.getElementById('out_visitas_header').textContent = state.visitas_feitas || 0;
+  document.getElementById('out_pedidos').textContent = state.pedidos > 0 ? state.pedidos : '—';
+
+  var ticket = state.pedidos > 0 ? state.venda / state.pedidos : 0;
+  var ticketStr = state.pedidos > 0 ? fmtBRL(ticket) : 'R$ —';
+  document.getElementById('out_ticket_medio').textContent = ticketStr;
+  document.getElementById('out_ticket_medio_header').textContent = ticketStr;
+
+  var taxa = state.visitas_feitas > 0 ? (state.visitas_efetivadas / state.visitas_feitas * 100) : 0;
+  var taxaStr = taxa.toFixed(1) + '%';
+  document.getElementById('out_taxa').textContent = taxaStr;
+  document.getElementById('out_taxa_header').textContent = taxaStr;
+  document.getElementById('taxa_bar').style.width = taxa + '%';
+  document.getElementById('out_taxa_desc').textContent = (state.visitas_efetivadas || 0) + ' de ' + (state.visitas_feitas || 0) + ' visitas convertidas';
+  atualizarGraficoVisitas(state.visitas_feitas || 0, state.visitas_efetivadas || 0);
+  atualizarProdutos();
+
+  if (state.data) {
+    var pp = state.data.split('-');
+    document.getElementById('out_rodape').textContent = 'Atualizado em ' + (pp.length === 3 ? pp[2]+'/'+pp[1]+'/'+pp[0] : state.data);
+  }
+
+  if (fecharPainel) {
+    document.getElementById('painel').classList.add('fechado');
+    document.getElementById('btn_toggle').textContent = '✏️ editar';
+  }
+}
+
+function coletarStateDosInputs() {
+  state.data = document.getElementById('inp_data').value || state.data || '';
+  state.venda = parseMoeda(document.getElementById('inp_venda').value);
+  state.visitas_feitas = parseInt(document.getElementById('inp_visitas_feitas').value) || 0;
+  state.visitas_efetivadas = parseInt(document.getElementById('inp_visitas_efetivadas').value) || 0;
+  state.visitas_efetivadas = Math.min(state.visitas_efetivadas, state.visitas_feitas);
+  state.pedidos = parseInt(document.getElementById('inp_pedidos').value) || 0;
+  state.obs = document.getElementById('inp_obs').value || '';
+}
+
+// ---- CALCULAR ----
+function calcular() {
+  coletarStateDosInputs();
+  atualizarTelaCompleta(true);
+}
+
+function togglePainel() {
+  var p = document.getElementById('painel');
+  var btn = document.getElementById('btn_toggle');
+  if (p.classList.contains('fechado')) {
+    p.classList.remove('fechado');
+    btn.textContent = '✕ fechar';
+  } else {
+    p.classList.add('fechado');
+    btn.textContent = '✏️ editar';
+  }
+}
+
+function toggleProdutos() {
+  var card = document.getElementById('produtos_card');
+  card.classList.toggle('expandido');
+}
+
+function salvarHTML() {
+  coletarStateDosInputs();
+  atualizarTelaCompleta(true);
+
+  var clone = document.documentElement.cloneNode(true);
+
+  // Remove dados salvos antigos do clone
+  var antigo = clone.querySelector('#relatorio-dados-salvos');
+  if (antigo) antigo.remove();
+
+  // Grava os dados em JSON dentro do HTML, sem aparecer visualmente na página
+  var dados = clone.ownerDocument.createElement('script');
+  dados.id = 'relatorio-dados-salvos';
+  dados.type = 'application/json';
+  dados.textContent = JSON.stringify(state).replace(/<\//g, '<\\/');
+  clone.querySelector('body').appendChild(dados);
+
+  // Garante que os campos também abram preenchidos mesmo antes do JS recalcular
+  function setValue(id, val) {
+    var el = clone.querySelector('#' + id);
+    if (el) el.setAttribute('value', val || '');
+  }
+  setValue('inp_data', state.data || '');
+  setValue('inp_venda', state.venda ? fmtBRL(state.venda).replace('R$ ', '') : '');
+  setValue('inp_visitas_feitas', state.visitas_feitas || '');
+  setValue('inp_visitas_efetivadas', state.visitas_efetivadas || '');
+  setValue('inp_pedidos', state.pedidos || '');
+  var obs = clone.querySelector('#inp_obs');
+  if (obs) obs.textContent = state.obs || '';
+
+  var html = '<!DOCTYPE html>\n' + clone.outerHTML;
+  var dataNome = state.data || new Date().toISOString().slice(0,10);
+  var partes = dataNome.split('-');
+  var nome = partes.length === 3 ? partes[2] + '-' + partes[1] + '-' + partes[0] + '.html' : 'relatorio-televendas.html';
+
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = nome;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+</script>
+</body></html>
