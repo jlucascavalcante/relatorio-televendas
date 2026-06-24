@@ -2,6 +2,10 @@
 
 Dashboard diário de televendas desenvolvido em HTML e JavaScript puro.
 
+## 📸 Preview do Dashboard
+
+![Preview do Dashboard](previewT.png)
+
 ---
 
 ## ✨ Funcionalidades
